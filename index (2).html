@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Latihan Ujian Online - SMPN Satu Atap 3 Sukasada</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #333; padding: 20px; line-height: 1.6; }
+    .container { max-width: 800px; background: #fff; padding: 30px; border-radius: 12px; margin: 20px auto; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
+    header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #3498db; padding-bottom: 15px; }
+    header h1 { font-size: 24px; color: #2c3e50; }
+    header p { color: #7f8c8d; font-size: 14px; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-weight: bold; margin-bottom: 6px; color: #34495e; }
+    input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; transition: border-color 0.3s; }
+    input[type="text"]:focus, select:focus { border-color: #3498db; outline: none; }
+    .btn { background: #3498db; color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; transition: background 0.3s; }
+    .btn:hover { background: #2980b9; }
+    .btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+    .hidden { display: none; }
+    .info-bar { background: #e8f4f8; border-left: 4px solid #3498db; padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; }
+    .question-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .question-title { font-weight: bold; font-size: 16px; margin-bottom: 12px; color: #1a202c; }
+    .options-group { display: flex; flex-direction: column; gap: 8px; }
+    .option-item { display: flex; align-items: center; padding: 10px 14px; border: 1px solid #cbd5e0; border-radius: 6px; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+    .option-item:hover { background: #ebf8ff; border-color: #3182ce; }
+    .option-item input { margin-right: 12px; cursor: pointer; }
+    .score-badge { text-align: center; padding: 20px; background: #f0fff4; border: 2px solid #38a169; border-radius: 10px; margin-top: 15px; }
+    .score-num { font-size: 48px; font-weight: bold; color: #276749; margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+<div class="container" id="front-page">
+  <header>
+    <h1>Portal Latihan Ujian Online</h1>
+    <p>SMP Negeri Satu Atap 3 Sukasada</p>
+  </header>
+  <form id="identity-form">
+    <div class="form-group">
+      <label for="nama">Nama Lengkap Siswa:</label>
+      <input type="text" id="nama" placeholder="Masukkan Nama Lengkap" required>
+    </div>
+    <div class="form-group">
+      <label for="kelas">Pilih Kelas:</label>
+      <select id="kelas" required>
+        <option value="">-- Pilih Kelas --</option>
+        <option value="8A">8A</option>
+        <option value="8B">8B</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="mapel">Pilih Mata Pelajaran Ujian:</label>
+      <select id="mapel" required>
+        <option value="">-- Pilih Mata Pelajaran --</option>
+        <option value="Informatika">Informatika (Kelas VIII)</option>
+        <option value="Koding">Koding & Kecerdasan Artifisial (Kelas VIII)</option>
+      </select>
+    </div>
+    <button type="button" class="btn" onclick="startExam()">Mulai Ujian (30 Soal Acak)</button>
+  </form>
+</div>
+
+<div class="container hidden" id="exam-page">
+  <div class="info-bar">
+    <span id="student-name">Nama: -</span>
+    <span id="student-class">Kelas: -</span>
+    <span id="exam-subject">Mapel: -</span>
+  </div>
+  <form id="quiz-form">
+    <div id="questions-container"></div>
+    <button type="button" class="btn" onclick="submitExam()">Kirim & Simpan Jawaban</button>
+  </form>
+</div>
+
+<div class="container hidden" id="result-page">
+  <header>
+    <h1>Hasil Latihan Ujian</h1>
+    <p>SMP Negeri Satu Atap 3 Sukasada</p>
+  </header>
+  <div id="result-content"></div>
+</div>
+
+<script>
+  // PASTE URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPiUK9ELNmjOCvqo6kWrg11svsqqoRR0nSl1SgYkSiJ8nZF5gEcCxvi3lGCPZwz4ojHQ/exec";
+
+  const bankSoal = {
+    informatika: [
+      { id_asli: 1, soal: "Sistem bilangan biner berbasis 2 hanya menggunakan dua simbol angka untuk mewakili data digital. Simbol angka tersebut adalah...", options: ["A. 0 dan 1", "B. 1 dan 2", "C. 0, 1, dan 2", "D. 1 hingga 8"], jawaban: 0 },
+      { id_asli: 2, soal: "Berdasarkan stimulus, Modul Utama mengirimkan kode angka desimal 25. Nilai desimal 25 jika dikonversi ke dalam sistem bilangan biner berbasis 2 adalah...", options: ["A. 10101₂", "B. 11001₂", "C. 11011₂", "D. 11100₂"], jawaban: 1 },
+      { id_asli: 3, soal: "Modul Sensor aktif dengan memberikan sinyal biner 11010₂. Berapakah nilai konversi bilangan biner tersebut jika diubah ke dalam bentuk bilangan desimal berbasis 10?", options: ["A. 22", "B. 24", "C. 26", "D. 28"], jawaban: 2 },
+      { id_asli: 4, soal: "Modul Alarm aktif dengan memberikan kode oktal 37₈. Bentuk biner yang setara dengan kode oktal 37₈ adalah...", options: ["A. 011111₂", "B. 011101₂", "C. 100111₂", "D. 101101₂"], jawaban: 0 },
+      { id_asli: 5, soal: "Urutan modul dari nilai kode terkecil hingga terbesar dalam desimal adalah...", options: ["A. Modul Utama (25), Modul Sensor (26), Modul Alarm (31)", "B. Modul Utama (25), Modul Alarm (31), Modul Sensor (26)", "C. Modul Sensor (26), Modul Utama (25), Modul Alarm (31)", "D. Modul Alarm (31), Modul Sensor (26), Modul Utama (25)"], jawaban: 0 },
+      { id_asli: 6, soal: "Sistem bilangan Oktal menggunakan basis 8. Angka-angka yang digunakan pada sistem bilangan ini adalah...", options: ["A. 1 sampai 8", "B. 0 sampai 7", "C. 0 sampai 8", "D. 1 sampai 7"], jawaban: 1 },
+      { id_asli: 7, soal: "Pada tabel di atas, sensor suhu memiliki alamat oktal 52₈. Hasil konversi angka oktal 52₈ ke bilangan biner adalah...", options: ["A. 101010₂", "B. 101001₂", "C. 110010₂", "D. 100101₂"], jawaban: 0 },
+      { id_asli: 8, soal: "Sensor kelembapan memiliki alamat biner 101111₂. Jika diubah menjadi kode bilangan oktal, nilai alamat tersebut adalah...", options: ["A. 57₈", "B. 47₈", "C. 67₈", "D. 77₈"], jawaban: 0 },
+      { id_asli: 9, soal: "Sensor curah hujan mencatat alamat oktal 74₈. Berapakah nilai desimal dari alamat memori tersebut?", options: ["A. 56", "B. 60", "C. 62", "D. 64"], jawaban: 1 },
+      { id_asli: 10, soal: "Apabila kapasitas alamat memori ditambah sebesar 15 (desimal) ke alamat Sensor Suhu (desimal 42), alamat baru tersebut jika dituliskan dalam biner dan oktal adalah...", options: ["A. Biner 111001₂ dan Oktal 71₈", "B. Biner 111001₂ dan Oktal 67₈", "C. Biner 110101₂ dan Oktal 71₈", "D. Biner 111100₂ dan Oktal 74₈"], jawaban: 0 },
+      { id_asli: 11, soal: "Fungsi pencarian data vertikal pada Google Sheets yang digunakan untuk mencari nilai berdasarkan kolom pertama tabel referensi adalah...", options: ["A. HLOOKUP", "B. VLOOKUP", "C. INDEX", "D. LOOKUP"], jawaban: 1 },
+      { id_asli: 12, soal: "Argumen parameter is_sorted / range_lookup bernilai FALSE pada rumus VLOOKUP berfungsi untuk...", options: ["A. Mencari nilai yang mendekati/mirip", "B. Mencari nilai yang benar-benar cocok tepat (exact match)", "C. Mengurutkan data secara otomatis dari A ke Z", "D. Mengabaikan kesalahan input data"], jawaban: 1 },
+      { id_asli: 13, soal: "Guru ingin menampilkan Nama Ekstrakurikuler untuk Bella (Baris 3) pada kolom E dengan membaca Tabel Referensi F2:G5. Rumus VLOOKUP yang tepat adalah...", options: ["A. =VLOOKUP(C3, F2:G5, 2, FALSE)", "B. =VLOOKUP(C3, F2:G5, 1, FALSE)", "C. =VLOOKUP(B3, F2:G5, 2, TRUE)", "D. =VLOOKUP(D3, F2:G5, 2, FALSE)"], jawaban: 0 },
+      { id_asli: 14, soal: "Jika guru mengetikkan rumus =VLOOKUP(\"E05\", F2:G5, 2, FALSE), hasil keluaran (output) yang akan muncul pada Google Sheets adalah...", options: ["A. Pramuka", "B. PMR", "C. #N/A", "D. #VALUE!"], jawaban: 2 },
+      { id_asli: 15, soal: "Seorang siswa mencoba mencari Nama Siswa pada baris ke-4 menggunakan kombinasi fungsi INDEX. Rumus yang ditulis adalah =INDEX(B2:B6, 3). Evaluasi terhadap rumus tersebut yang benar adalah...", options: ["A. Rumus salah, seharusnya menggunakan HLOOKUP", "B. Rumus benar, menghasilkan nilai 'Citra' (elemen baris ke-3 dari range B2:B6)", "C. Rumus salah, menghasilkan error #REF!", "D. Rumus benar, menghasilkan nilai 'Bella'"], jawaban: 1 },
+      { id_asli: 16, soal: "Untuk mengambil data nilai rata-rata siswa tertinggi menggunakan gabungan fungsi INDEX dan posisi baris, penyusunan logika alternatif selain MAX yang tepat adalah...", options: ["A. =INDEX(D2:D6, 2)", "B. =INDEX(D2:D6, MATCH(95, D2:D6, 0))", "C. =VLOOKUP(95, D2:D6, 1, TRUE)", "D. =HLOOKUP(95, D2:D6, 1, FALSE)"], jawaban: 1 },
+      { id_asli: 17, soal: "Fungsi dalam Google Sheets yang digunakan untuk pencarian data secara mendatar/horisontal berdasarkan baris pertama tabel adalah...", options: ["A. INDEX", "B. VLOOKUP", "C. HLOOKUP", "D. MATCH"], jawaban: 2 },
+      { id_asli: 18, soal: "Alasan parameter range_lookup pada rumus HLOOKUP untuk kasus tingkat belanja di atas diset menjadi TRUE (atau diabaikan) adalah...", options: ["A. Agar nilai pencarian harus tepat sama dengan angka dalam tabel", "B. Karena rentang harga belanja bertingkat dan memerlukan pencarian nilai mendekati (approximate match)", "C. Agar rumus memproses teks secara otomatis", "D. Karena baris pertama tidak berurutan"], jawaban: 1 },
+      { id_asli: 19, soal: "Rumus HLOOKUP untuk menghitung persentase diskon belanjaan Rian (Rp18.000,-) pada tabel A1:E2 adalah...", options: ["A. =HLOOKUP(18000, A1:E2, 2, TRUE)", "B. =HLOOKUP(18000, A1:E2, 1, FALSE)", "C. =VLOOKUP(18000, A1:E2, 2, TRUE)", "D. =HLOOKUP(18000, A1:E2, 2, FALSE)"], jawaban: 0 },
+      { id_asli: 20, soal: "Berdasarkan rumus =HLOOKUP(18000, A1:E2, 2, TRUE), besarnya persentase diskon yang diperoleh Rian adalah...", options: ["A. 0%", "B. 5%", "C. 10%", "D. 15%"], jawaban: 1 },
+      { id_asli: 21, soal: "Jika Sari berbelanja sebesar Rp50.000,- dan menggunakan rumus =HLOOKUP(50000, A1:E2, 2, FALSE), persentase diskon yang didapat adalah...", options: ["A. 10%", "B. 15%", "C. #N/A", "D. 20%"], jawaban: 1 },
+      { id_asli: 22, soal: "Seorang kasir memasukkan rumus =HLOOKUP(8000, A1:E2, 2, FALSE) untuk Tono. Rumus tersebut menghasilkan #N/A. Perbaikan yang paling tepat agar rumus mengembalikan nilai 0% adalah...", options: ["A. Mengubah angka 8000 menjadi '8000'", "B. Mengubah indeks baris dari 2 menjadi 1", "C. Mengubah parameter FALSE menjadi TRUE", "D. Mengganti fungsi HLOOKUP dengan INDEX"], jawaban: 2 },
+      { id_asli: 23, soal: "Fungsi INDEX(array, row_num, [column_num]) pada Google Sheets mengembalikan...", options: ["A. Nomor baris dari suatu sel", "B. Nilai dari sel tertentu pada baris dan kolom yang ditunjuk", "C. Jumlah total sel dalam rentang", "D. Hasil pencarian teks secara eksak"], jawaban: 1 },
+      { id_asli: 24, soal: "Jika dimasukkan rumus =INDEX(A1:C4, 3, 2), maka hasil teks yang akan tampil di Google Sheets adalah...", options: ["A. Keyboard", "B. Mouse", "C. ID-03", "D. 30"], jawaban: 1 },
+      { id_asli: 25, soal: "Rumus gabungan =INDEX(C1:C4, MATCH(\"Keyboard\", B1:B4, 0)) digunakan untuk mencari jumlah unit Keyboard. Hasil angka yang dikeluarkan oleh rumus tersebut adalah...", options: ["A. 24", "B. 30", "C. 4", "D. Error"], jawaban: 1 },
+      { id_asli: 26, soal: "Fitur pada Google Docs yang digunakan untuk menyisipkan gambar tangkapan layar peta lokasi sekolah dari Google Maps adalah...", options: ["A. Insert > Table", "B. Insert > Image > Upload / Search", "C. Insert > Chart > From Sheets", "D. Tools > Map Integration"], jawaban: 1 },
+      { id_asli: 27, soal: "Saat mengopi grafik dari Google Sheets ke Google Docs, muncul opsi pop-up 'Link to spreadsheet'. Fungsi utama memilih opsi tersebut adalah...", options: ["A. Agar grafik di Google Docs berubah otomatis saat data di Google Sheets diperbarui", "B. Agar ukuran grafik menjadi lebih kecil", "C. Agar file Google Docs tidak bisa diedit orang lain", "D. Untuk mengunci grafik agar tidak bergerak"], jawaban: 0 },
+      { id_asli: 28, soal: "Siswa ingin melengkapi laporan dengan menyisipkan peta alamat sekolah. Urutan langkah yang benar untuk memasukkan gambar peta Google Maps ke Google Docs adalah...", options: ["A. Buka Google Maps -> Cari lokasi sekolah -> Buat screenshot / Simpan gambar -> Buka Google Docs -> Pilih menu Insert > Image", "B. Buka Google Docs -> Ketik 'Google Maps' -> Klik tombol otomatis", "C. Copy link Google Maps -> Paste di Google Sheets -> Import ke Docs", "D. Download Google Docs -> Paste link Google Maps di folder komputer"], jawaban: 0 },
+      { id_asli: 29, soal: "Dika memperbarui data angka penanaman pohon pada tabel Google Sheets. Namun, grafik di Google Docs miliknya tidak berubah secara otomatis. Penyebab paling logis dari kejadian ini adalah...", options: ["A. Dika lupa menyimpan file Google Docs", "B. Saat menempelkan (paste) grafik, Dika memilih opsi 'Paste unlinked'", "C. Google Sheets mengalami error rumus", "D. Gambar Google Maps belum diperbarui"], jawaban: 1 },
+      { id_asli: 30, soal: "Manakah pernyataan di bawah ini yang menunjukkan keuntungan utama integrasi data grafik antara Google Sheets dan Google Docs secara terkoneksi (linked)?", options: ["A. Menghemat ruang penyimpanan memori harddisk secara luring", "B. Mencegah orang lain membaca data mentah pada tabel", "C. Menjaga konsistensi data antara laporan naratif dan data visual tanpa perlu menyunting ulang secara manual", "D. Mempercepat proses cetak dokumen di kertas"], jawaban: 2 },
+      { id_asli: 31, soal: "Tombol pada Google Docs yang digunakan untuk membagikan akses edit dokumen kepada anggota kelompok lain adalah...", options: ["A. Download", "B. Share (Bagikan)", "C. Publish to Web", "D. Version History"], jawaban: 1 },
+      { id_asli: 32, soal: "Hak akses 'Viewer' (Penglihat) yang diberikan saat membagikan Google Docs berarti pengguna tersebut...", options: ["A. Dapat mengubah dan menghapus isi teks", "B. Hanya dapat membaca dokumen tanpa bisa mengedit atau memberi komentar", "C. Dapat menambah grafik baru dari Google Sheets", "D. Berhak menghapus dokumen dari Drive"], jawaban: 1 },
+      { id_asli: 33, soal: "Jika kamu ingin memberi masukan atau revisi pada kalimat tertentu tanpa mengubah teks asli temanmu di Google Docs, fitur yang tepat digunakan adalah...", options: ["A. Format Text", "B. Add Comment (Tambah Komentar) / Suggesting Mode", "C. Replace Text", "D. Page Setup"], jawaban: 1 },
+      { id_asli: 34, soal: "Sebuah grafik yang ditempel dengan metode 'Link to Spreadsheet' menampilkan tombol 'Update' di sudut kanan atas gambar saat dibuka di Google Docs. Tombol tersebut muncul karena...", options: ["A. File Google Docs belum diberi nama", "B. Terjadi perubahan data pada file sumber Google Sheets", "C. Koneksi internet terputus", "D. Grafik di-crop oleh pengguna lain"], jawaban: 1 },
+      { id_asli: 35, soal: "Rancangan tata letak (layout) laporan digital yang efisien dan rapi untuk menyajikan perbandingan data keuangan kantin meliputi komponen berikut, kecuali...", options: ["A. Judul laporan terstruktur", "B. Peta Google Maps alamat kantin", "C. Grafik visual hasil copy-link Google Sheets", "D. Video animasi yang berputar terus-menerus di atas kertas cetak"], jawaban: 3 },
+      { id_asli: 36, soal: "Empat pilar utama dalam Berpikir Komputasional (Computational Thinking) adalah...", options: ["A. Input, Process, Output, Storage", "B. Dekomposisi, Pengenalan Pola, Abstraksi, Algoritma", "C. Biner, Desimal, Oktal, Heksadesimal", "D. Hardware, Software, Brainware, Network"], jawaban: 1 },
+      { id_asli: 37, soal: "Proses membuang bagian adonan yang tidak rapi dan hanya fokus pada bentuk dasar donat merupakan penerapan pilar berpikir komputasional yaitu...", options: ["A. Dekomposisi", "B. Algoritma", "C. Abstraksi", "D. Pengenalan Pola"], jawaban: 2 },
+      { id_asli: 38, soal: "Jika adonan awal berbentuk Bulat (O) dimasukkan ke Mesin A lalu dilanjutkan ke Mesin B, perubahan bentuk adonan secara berurutan adalah...", options: ["A. Bulat -> Persegi Gepeng -> Donat Berlubang", "B. Bulat -> Donat Berlubang -> Segitiga", "C. Persegi -> Bulat -> Donat Berlubang", "D. Bulat -> Bintang -> Tabung"], jawaban: 0 },
+      { id_asli: 39, soal: "Diberikan adonan Y berbobot 40g diproses melalui Mesin A -> Mesin B -> Mesin C. Hasil akhir (output) dari adonan Y adalah...", options: ["A. Donat berlubang dengan toping cokelat", "B. Donat berlubang tanpa toping cokelat", "C. Adonan gepeng persegi dengan toping cokelat", "D. Adonan bulat utuh"], jawaban: 1 },
+      { id_asli: 40, soal: "Operator mesin mendapati bahwa kue hasil produksi Adonan Z tidak berlubang di tengahnya tetapi memiliki toping cokelat. Analisis kesalahan proses pada adonan Z adalah...", options: ["A. Mesin C rusak", "B. Adonan Z melewati Mesin B (proses pencetakan lubang terlewati)", "C. Adonan Z kurang beratnya", "D. Mesin A gagal memipihkan adonan"], jawaban: 1 },
+      { id_asli: 41, soal: "Prinsip antrean Queue dalam struktur data komputer menganut prinsip...", options: ["A. LIFO (Last In First Out)", "B. FIFO (First In First Out)", "C. FILO (First In Last Out)", "D. Random Access"], jawaban: 1 },
+      { id_asli: 42, soal: "Jika urutan adonan yang masuk ke ban berjalan adalah [M, H, K], maka adonan yang akan diproses dan keluar pertama kali oleh mesin adalah adonan berwarna...", options: ["A. Kuning", "B. Hijau", "C. Merah", "D. Semuanya bersamaan"], jawaban: 2 },
+      { id_asli: 43, soal: "Urutan masukan adonan adalah [M, H, K, M]. Bentuk visual urutan kue yang keluar dari mesin adalah...", options: ["A. Bintang, Hati, Lingkaran, Bintang", "B. Hati, Bintang, Lingkaran, Bintang", "C. Lingkaran, Bintang, Hati, Bintang", "D. Bintang, Lingkaran, Hati, Bintang"], jawaban: 0 },
+      { id_asli: 44, soal: "Terjadi kemacetan sehingga perilaku mesin berubah menjadi Stack (LIFO). Jika adonan masuk dengan urutan [Hijau, Kuning, Merah], urutan kue yang keluar adalah...", options: ["A. Hati, Lingkaran, Bintang", "B. Bintang, Lingkaran, Hati", "C. Lingkaran, Hati, Bintang", "D. Bintang, Hati, Lingkaran"], jawaban: 1 },
+      { id_asli: 45, soal: "Formula: 'Jika adonan Bintang (hasil Merah) bertemu adonan Hati (hasil Hijau), tumpuk menjadi Kue Lapis Dual-Rasa'. Dari masukan [M, H, K, M, H], berapa banyak Kue Lapis yang terbentuk?", options: ["A. 1", "B. 2", "C. 3", "D. 0"], jawaban: 1 }
+    ],
+    koding: [
+      { id_asli: 1, soal: "Berdasarkan Stimulus 1, bentuk awal adonan sebelum dimasukkan ke dalam mesin pemroses adalah ...", options: ["A. Lempeng Lingkaran", "B. Bintang", "C. Tabung", "D. Kubus"], jawaban: 2 },
+      { id_asli: 2, soal: "Jika adonan berbentuk Tabung (T) dimasukkan melalui urutan mesin: [ F -> B ], maka bentuk akhir adonan yang dihasilkan adalah ...", options: ["A. Tabung kecil", "B. Lempeng Lingkaran", "C. Bintang", "D. Adonan rusak karena urutan salah"], jawaban: 2 },
+      { id_asli: 3, soal: "Jika 1 adonan Tabung dimasukkan ke mesin dengan urutan [ P -> F ], berapa banyak adonan Lempeng Lingkaran yang dihasilkan?", options: ["A. 1", "B. 2", "C. 3", "D. 4"], jawaban: 1 },
+      { id_asli: 4, soal: "Seorang operator pabrik ingin membuat 8 buah adonan bentuk Bintang dari 1 adonan Tabung utama. Kombinasi proses algoritma yang benar adalah ...", options: ["A. P -> P -> P -> F -> B", "B. P -> F -> B -> P", "C. F -> P -> P -> B", "D. P -> P -> F -> B"], jawaban: 0 },
+      { id_asli: 5, soal: "Mesin mengalami kerusakan pada Fungsi F (Pipih) sehingga tidak bisa mengubah Tabung menjadi Lempeng. Apa yang terjadi jika adonan Tabung dimasukkan ke dalam rangkaian [ P -> B ]?", options: ["A. Dihasilkan 2 kue berbentuk bintang", "B. Dihasilkan 2 adonan berbentuk tabung kecil", "C. Dihasilkan 1 kue bintang ukuran besar", "D. Mesin akan mencetak bentuk bundar"], jawaban: 1 },
+      { id_asli: 6, soal: "Manakah urutan proses berikut yang paling efisien untuk menghasilkan 4 kue bentuk bintang dari 1 adonan besar?", options: ["A. P -> P -> F -> B", "B. F -> B -> P -> P", "C. P -> F -> P -> B", "D. P -> F -> B -> P"], jawaban: 0 },
+      { id_asli: 7, soal: "Dalam konsep Berpikir Komputasional, proses membagi adonan tabung menjadi 2 bagian yang lebih kecil dengan Fungsi P merupakan contoh penerapan dari ...", options: ["A. Pattern Recognition", "B. Decomposisi", "C. Abstraksi", "D. Algoritma"], jawaban: 1 },
+      { id_asli: 8, soal: "Jika input adonan berupa 2 Tabung (T) diproses dengan fungsi [ P -> F -> B ], maka output total kue Bintang adalah ...", options: ["A. 2", "B. 4", "C. 6", "D. 8"], jawaban: 1 },
+      { id_asli: 9, soal: "Jika ditambahkan mesin baru Fungsi Cokelat (C) yang melapisi adonan dengan cokelat di akhir proses, urutan simbol fungsi untuk membuat 4 kue Bintang Berlapis Cokelat dari 1 Tabung adalah ...", options: ["A. C -> P -> P -> F -> B", "B. P -> P -> F -> B -> C", "C. P -> F -> C -> B -> P", "D. F -> B -> C -> P -> P"], jawaban: 1 },
+      { id_asli: 10, soal: "Setiap 1 kali proses pemotongan (P) membutuhkan waktu 2 detik, Pipih (F) 3 detik, dan Cetak Bintang (B) 1 detik. Berapa total waktu pemrosesan 1 adonan melalui jalur [ P -> F -> B ]?", options: ["A. 5 detik", "B. 6 detik", "C. 8 detik", "D. 12 detik"], jawaban: 1 },
+      { id_asli: 11, soal: "Hasil produksi menunjukkan kue berukuran bintang tetapi tepinya tidak rapi karena dipotong setelah dicetak. Jalur mesin yang menyebabkan error bentuk ini adalah ...", options: ["A. F -> B -> P", "B. P -> F -> B", "C. F -> P -> B", "D. P -> P -> F"], jawaban: 0 },
+      { id_asli: 12, soal: "Jika bahan adonan awal terbatas hanya 3 Tabung, berapa jumlah maksimum kue Bintang yang bisa dihasilkan jika kapasitas pemotongan maksimal per adonan adalah 2 kali (P -> P)?", options: ["A. 6", "B. 8", "C. 12", "D. 16"], jawaban: 2 },
+      { id_asli: 13, soal: "Aplikasi web Teachable Machine berbasis pemrosesan data menggunakan teknologi ...", options: ["A. Database Relasional", "B. Artificial Intelligence / Machine Learning", "C. Spreadsheet Formula", "D. Network Security"], jawaban: 1 },
+      { id_asli: 14, soal: "Pada Teachable Machine, proses mengunggah atau mengambil gambar wajah tersenyum dan tidak tersenyum ke dalam kelas masing-masing dinamakan tahap ...", options: ["A. Output / Prediction", "B. Training", "C. Data Collection (Pengumpulan Data)", "D. Export Model"], jawaban: 2 },
+      { id_asli: 15, soal: "Siswa memasukkan gambar baru seorang anak yang sedang tertawa lebar ke depan kamera pengujian. Persentase probabilitas yang akan diprediksi oleh model adalah ...", options: ["A. Kelas 1 (Wajah Tersenyum) mendekati 100%", "B. Kelas 2 (Wajah Tidak Tersenyum) mendekati 100%", "C. Kedua kelas bernilai 50% : 50%", "D. Model akan mengalami error"], jawaban: 0 },
+      { id_asli: 16, soal: "Jika Kelas 1 dimasukkan 300 foto dengan pencahayaan terang, sedangkan Kelas 2 hanya dimasukkan 10 foto dengan pencahayaan gelap, apa yang akan terjadi ketika diuji foto orang tidak tersenyum di tempat terang?", options: ["A. Model tetap akurat 100%", "B. Model mengalami bias dan kemungkinan salah memprediksi sebagai Wajah Tersenyum", "C. Model otomatis menambah sampel foto Kelas 2", "D. Sistem Teachable Machine tidak bisa dijalankan"], jawaban: 1 },
+      { id_asli: 17, soal: "Mengapa saat pengumpulan sampel gambar wajah pada Teachable Machine disarankan menggunakan berbagai sudut (angle) dan latar belakang yang bervariasi?", options: ["A. Agar ukuran file model menjadi lebih kecil", "B. Agar model AI dapat menggeneralisasi ekspresi dengan akurat tanpa terpengaruh latar belakang", "C. Agar proses training berjalan lebih cepat", "D. Agar kamera webcam tidak cepat panas"], jawaban: 1 },
+      { id_asli: 18, soal: "Saat menguji seseorang yang menggunakan masker tetapi matanya tersenyum, model memprediksi Kelas 2 (Tidak Tersenyum) dengan confidence 85%. Langkah terbaik untuk meningkatkan akurasi model adalah ...", options: ["A. Mengubah nama Kelas 1", "B. Menambahkan contoh data latih orang bermasker yang tersenyum ke Kelas 1", "C. Mengurangi jumlah epoch saat training", "D. Menghapus seluruh data Kelas 2"], jawaban: 1 },
+      { id_asli: 19, soal: "Model AI memberikan skor keluaran untuk sebuah foto pengujian: Kelas 1 (Wajah Tersenyum): 0.82 dan Kelas 2 (Wajah Tidak Tersenyum): 0.18. Berapa persentase keyakinan model bahwa foto tersebut adalah Wajah Tersenyum?", options: ["A. 8.2%", "B. 18%", "C. 82%", "D. 100%"], jawaban: 2 },
+      { id_asli: 20, soal: "Tombol yang diklik untuk memulai proses pembelajaran data pada Teachable Machine setelah data kelas terkumpul adalah ...", options: ["A. Preview", "B. Train Model", "C. Add Class", "D. File Export"], jawaban: 1 },
+      { id_asli: 21, soal: "Manakah dari objek berikut yang paling tepat menggunakan model klasifikasi Image Project di Teachable Machine?", options: ["A. Memisahkan file lagu MP3", "B. Mengindeks kata dalam dokumen PDF", "C. Membedakan wajah tersenyum dan tidak tersenyum", "D. Menghitung rumus matematika otomatis"], jawaban: 2 },
+      { id_asli: 22, soal: "Seorang siswa mencoba melatih AI dengan foto orang tidak tersenyum memakai kacamata hitam, lalu diprediksi sebagai Kelas 1 (Tersenyum). Penyebab utama kesalahan AI ini adalah ...", options: ["A. AI fokus mengenali fitur kacamata hitam, bukan ekspresi senyum (Spurious Correlation)", "B. Kamera mengalami kerusakan resolusi", "C. Jumlah kelas terlalu banyak", "D. Komputer kekurangan memori"], jawaban: 0 },
+      { id_asli: 23, soal: "Aplikasi nyata kehidupan sehari-hari yang menggunakan prinsip klasifikasi ekspresi wajah serupa dengan proyek ini adalah ...", options: ["A. Fitur autofill alamat pada browser web", "B. Kamera ponsel yang otomatis memberi efek beautify atau stiker saat mendeteksi senyuman", "C. Mesin pencari Google yang menampilkan hasil teks", "D. Pengisian daya nirkabel (wireless charging)"], jawaban: 1 },
+      { id_asli: 24, soal: "Seorang pengembang ingin membuat sistem presensi kehadiran berbasis deteksi wajah gembira siswa di sekolah. Apakah model dengan 2 kelas di atas cukup ideal untuk presensi?", options: ["A. Cukup, karena sudah bisa membedakan senyum dan tidak senyum", "B. Tidak cukup, karena model belum mengenali identitas (face recognition) individu siswa", "C. Sangat cukup, karena Teachable Machine berbasis cloud", "D. Tidak cukup, karena jaringan internet sekolah lambat"], jawaban: 1 },
+      { id_asli: 25, soal: "Dalam istilah Pembelajaran Mesin (Machine Learning), metode pelatihan menggunakan label 'Kelas 1' dan 'Kelas 2' tergolong dalam ...", options: ["A. Unsupervised Learning", "B. Supervised Learning", "C. Reinforcement Learning", "D. Semi-automatic Learning"], jawaban: 1 },
+      { id_asli: 26, soal: "Jika kita memasukkan foto kucing ke dalam model klasifikasi wajah tersenyum vs tidak tersenyum ini, apa yang akan dilakukan oleh model?", options: ["A. Mengeluarkan pesan error 'Bukan Manusia'", "B. Otomatis menutup aplikasi", "C. Tetap mengklasifikasikannya ke salah satu kelas berdasarkan kemiripan fitur terdekat", "D. Menghapus foto kucing secara otomatis"], jawaban: 2 },
+      { id_asli: 27, soal: "Bagaimana cara memodifikasi sistem ini agar dapat membedakan 3 ekspresi: Tersenyum, Sedih, dan Marah?", options: ["A. Menambahkan parameter Epoch saat training", "B. Membuat kelas baru (Kelas 3) dan memasukkan sampel gambar ekspresi Marah", "C. Mengganti webcam dengan resolusi HD", "D. Menggunakan rumus VLOOKUP di Teachable Machine"], jawaban: 1 },
+      { id_asli: 28, soal: "Jika total sampel data yang digunakan adalah 500 foto (300 Kelas 1 dan 200 Kelas 2), berapakah rasio perbandingan sampel Kelas 1 dan Kelas 2 dalam bentuk paling sederhana?", options: ["A. 5 : 2", "B. 3 : 2", "C. 3 : 5", "D. 1 : 2"], jawaban: 1 },
+      { id_asli: 29, soal: "Berdasarkan Tabel Master Toko TechMart, barang yang memiliki Kode BRG02 adalah ...", options: ["A. Mouse Gaming", "B. Keyboard Mekanik", "C. Headset RGB", "D. Flashdisk"], jawaban: 1 },
+      { id_asli: 30, soal: "Fungsi VLOOKUP pada aplikasi Spreadsheet digunakan untuk pencarian data yang tersusun secara ...", options: ["A. Horizontal (Mendatar)", "B. Vertikal (Tegak)", "C. Diagonal", "D. Acak"], jawaban: 1 },
+      { id_asli: 31, soal: "Rumus yang tepat untuk mengisi Nama Barang pada sel B2 berdasarkan Kode Barang di sel A2 menggunakan Tabel Master (F2:H4) adalah ...", options: ["A. =VLOOKUP(A2, F2:H4, 2, FALSE)", "B. =VLOOKUP(A2, F2:H4, 1, FALSE)", "C. =HLOOKUP(A2, F2:H4, 2, FALSE)", "D. =VLOOKUP(B2, F2:H4, 2, TRUE)"], jawaban: 0 },
+      { id_asli: 32, soal: "Rumus yang tepat untuk mengambil nilai Harga Satuan pada sel D2 dari Tabel Master (F2:H4) adalah ...", options: ["A. =VLOOKUP(A2, F2:H4, 3, FALSE)", "B. =VLOOKUP(A2, F2:H4, 2, FALSE)", "C. =HLOOKUP(A2, F2:H4, 3, FALSE)", "D. =VLOOKUP(D2, F2:H4, 3, TRUE)"], jawaban: 0 },
+      { id_asli: 33, soal: "Berapa nilai Harga Satuan (sel D2) yang muncul untuk barang ber-Kode BRG02?", options: ["A. Rp 150.000", "B. Rp 250.000", "C. Rp 350.000", "D. Rp 750.000"], jawaban: 2 },
+      { id_asli: 34, soal: "Berdasarkan transaksi pada sel Baris 2 (BRG02 beli 3 unit @ Rp 350.000), total harga sebelum diskon adalah ...", options: ["A. Rp 450.000", "B. Rp 750.000", "C. Rp 1.050.000", "D. Rp 500.000"], jawaban: 2 },
+      { id_asli: 35, soal: "Untuk menentukan persentase diskon di Tabel 3 (J1:L2) berdasarkan Jumlah Beli (C2), rumus HLOOKUP yang digunakan adalah ...", options: ["A. =HLOOKUP(C2, J1:L2, 2, TRUE)", "B. =VLOOKUP(C2, J1:L2, 2, FALSE)", "C. =HLOOKUP(C2, J1:L2, 1, TRUE)", "D. =HLOOKUP(A2, J1:L2, 2, FALSE)"], jawaban: 0 },
+      { id_asli: 36, soal: "Berapa besarnya persentase diskon yang diperoleh transaksi pada baris ke-3 (Kode BRG01, Jumlah Beli = 5)?", options: ["A. 0%", "B. 5%", "C. 10%", "D. 15%"], jawaban: 2 },
+      { id_asli: 37, soal: "Seorang kasir memasukkan rumus =VLOOKUP(A2, F2:H4, 4, FALSE) di sel B2 dan menghasilkan error #REF!. Penyebab error tersebut adalah ...", options: ["A. Nilai pencarian di A2 tidak ada", "B. Indeks kolom yang diminta (4) melebihi jumlah kolom tabel referensi (hanya 3 kolom)", "C. Rentang sel F2:H4 salah", "D. Kata FALSE harusnya diganti TRUE"], jawaban: 1 },
+      { id_asli: 38, soal: "Jika pada sel A5 dimasukkan kode barang 'BRG05' yang tidak terdaftar di Tabel Master, maka hasil dari rumus =VLOOKUP(A5, F2:H4, 2, FALSE) adalah ...", options: ["A. 0", "B. #N/A", "C. #VALUE!", "D. Blank (Kosong)"], jawaban: 1 },
+      { id_asli: 39, soal: "Perbedaan mendasar antara parameter FALSE (atau 0) dan TRUE (atau 1) pada bagian akhir argumen rumus VLOOKUP adalah ...", options: ["A. FALSE untuk mencari pencocokan persis (exact match), TRUE untuk mendekati (approximate match)", "B. FALSE untuk data angka, TRUE untuk data teks", "C. FALSE untuk VLOOKUP, TRUE untuk HLOOKUP", "D. Tidak ada perbedaan hasil"], jawaban: 0 },
+      { id_asli: 40, soal: "Hitunglah Total Bayar (Sebelum Diskon) pada Baris 4 (Kode BRG03, Jumlah Beli = 2 @ Rp 250.000)!", options: ["A. Rp 300.000", "B. Rp 500.000", "C. Rp 700.000", "D. Rp 250.000"], jawaban: 1 },
+      { id_asli: 41, soal: "Formula perhitungan Total Bayar setelah Diskon untuk transaksi baris 2 yang paling tepat adalah ...", options: ["A. =C2 * D2 * (1 - HLOOKUP(C2, J1:L2, 2, TRUE))", "B. =C2 + D2 * HLOOKUP(C2, J1:L2, 2, TRUE)", "C. =VLOOKUP(A2, F2:H4, 3, FALSE) - HLOOKUP(C2, J1:L2, 2, TRUE)", "D. =C2 * D2 * HLOOKUP(C2, J1:L2, 2, TRUE)"], jawaban: 0 },
+      { id_asli: 42, soal: "Fitur Filter Data pada Spreadsheet digunakan untuk ...", options: ["A. Menghapus data yang tidak diinginkan secara permanen", "B. Menyembunyikan baris data yang tidak memenuhi kriteria tertentu tanpa menghapusnya", "C. Mengubah warna huruf tabel otomatis", "D. Mengurutkan data berdasarkan abjad saja"], jawaban: 1 },
+      { id_asli: 43, soal: "Tabel data bonus gaji karyawan disusun secara mendatar dari kiri ke kanan (Header di Kolom paling kiri). Rumus pencarian yang harus digunakan adalah ...", options: ["A. VLOOKUP", "B. HLOOKUP", "C. COUNTIF", "D. SUMIF"], jawaban: 1 },
+      { id_asli: 44, soal: "Jika tabel referensi VLOOKUP dikunci agar rumusnya bisa disalin (copy-paste) ke bawah tanpa tergeser, maka penulisan rentang tabel F2:H4 yang benar adalah ...", options: ["A. F2:H4", "B. $F$2:$H$4", "C. #F#2:#H#4", "D. @F2:@H4"], jawaban: 1 },
+      { id_asli: 45, soal: "Berapa nilai rupiah diskon yang didapat untuk transaksi pada Baris 3 (BRG01, beli 5 unit @ Rp 150.000, diskon 10%)?", options: ["A. Rp 15.000", "B. Rp 75.000", "C. Rp 150.000", "D. Rp 675.000"], jawaban: 1 }
+    ]
+  };
+
+  let selectedQuestions = [];
+  let studentData = {};
+
+  function startExam() {
+    const nama = document.getElementById('nama').value.trim();
+    const kelas = document.getElementById('kelas').value;
+    const mapel = document.getElementById('mapel').value;
+
+    if (!nama || !kelas || !mapel) {
+      alert("Mohon lengkapi Nama, Kelas, dan Mata Pelajaran terlebih dahulu!");
+      return;
+    }
+
+    studentData = { nama, kelas, mapel };
+    
+    // Pilih bank soal
+    let source = mapel === "Informatika" ? bankSoal.informatika : bankSoal.koding;
+    
+    // Acak array dan ambil 30 soal
+    let shuffled = [...source].sort(() => 0.5 - Math.random());
+    selectedQuestions = shuffled.slice(0, 30);
+
+    renderExam();
+
+    document.getElementById('front-page').classList.add('hidden');
+    document.getElementById('exam-page').classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+
+  function renderExam() {
+    document.getElementById('student-name').innerText = `Nama: ${studentData.nama}`;
+    document.getElementById('student-class').innerText = `Kelas: ${studentData.kelas}`;
+    document.getElementById('student-subject').innerText = `Mapel: ${studentData.mapel}`;
+
+    const container = document.getElementById('questions-container');
+    container.innerHTML = "";
+
+    selectedQuestions.forEach((q, index) => {
+      let qHTML = `
+        <div class="question-card">
+          <div class="question-title">${index + 1}. ${q.soal}</div>
+          <div class="options-group">
+      `;
+
+      q.options.forEach((opt, optIdx) => {
+        qHTML += `
+          <label class="option-item">
+            <input type="radio" name="q_${index}" value="${optIdx}">
+            <span>${opt}</span>
+          </label>
+        `;
+      });
+
+      qHTML += `
+          </div>
+        </div>
+      `;
+      container.innerHTML += qHTML;
+    });
+  }
+
+  function submitExam() {
+    let benarCount = 0;
+    let jawabanRekap = [];
+    let unans = 0;
+
+    selectedQuestions.forEach((q, index) => {
+      const selected = document.querySelector(`input[name="q_${index}"]:checked`);
+      if (selected) {
+        const userAns = parseInt(selected.value);
+        const optChar = String.fromCharCode(65 + userAns);
+        
+        if (userAns === q.jawaban) {
+          benarCount++;
+          jawabanRekap.push(`[No.${q.id_asli}]: ${optChar} (Benar)`);
+        } else {
+          jawabanRekap.push(`[No.${q.id_asli}]: ${optChar} (Salah)`);
+        }
+      } else {
+        jawabanRekap.push(`[No.${q.id_asli}]: - (Kosong)`);
+        unans++;
+      }
+    });
+
+    if (unans > 0) {
+      if (!confirm(`Terdapat ${unans} soal yang belum dijawab. Yakin ingin mengumpulkan?`)) return;
+    }
+
+    let nilaiFinal = Math.round((benarCount / 30) * 100);
+
+    const payload = {
+      nama: studentData.nama,
+      kelas: studentData.kelas,
+      mapel: studentData.mapel,
+      benar: benarCount,
+      nilai: nilaiFinal,
+      jawabanSiswa: jawabanRekap.join(" | ")
+    };
+
+    const btn = document.querySelector("#quiz-form button");
+    btn.innerText = "Mengirim Nilai...";
+    btn.disabled = true;
+
+    // Kirim data ke Google Sheets via Apps Script Web App
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      document.getElementById('exam-page').classList.add('hidden');
+      document.getElementById('result-page').classList.remove('hidden');
+      
+      document.getElementById('result-content').innerHTML = `
+        <p>Terima kasih telah menyelesaikan latihan ujian online.</p>
+        <div class="score-badge">
+          <p>Jawaban Benar: <b>${benarCount} dari 30 Soal</b></p>
+          <div class="score-num">${nilaiFinal}</div>
+          <p style="color: #276749;">Nilai dan rincian jawaban telah berhasil disimpan ke Google Sheets!</p>
+        </div>
+      `;
+      window.scrollTo(0, 0);
+    })
+    .catch(err => {
+      alert("Gagal terhubung ke database. Periksa koneksi internet Anda.");
+      btn.innerText = "Kirim & Simpan Jawaban";
+      btn.disabled = false;
+    });
+  }
+</script>
+</body>
+</html>
